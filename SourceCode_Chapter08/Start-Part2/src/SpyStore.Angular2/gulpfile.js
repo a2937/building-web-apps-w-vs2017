@@ -12,6 +12,6 @@ gulp.task('copy:node', function () {
     'node_modules/@angular/**/bundles/*',
       
       'node_modules/rx*/**',
-      'node_modules/core-js*/**',
+      'node_modules/core-js*/**'
     ]).pipe(gulp.dest('./wwwroot/lib/'));
 });
