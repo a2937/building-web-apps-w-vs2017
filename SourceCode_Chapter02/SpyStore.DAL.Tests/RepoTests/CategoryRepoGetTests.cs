@@ -1,30 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
 using SpyStore.Models.Entities;
+using System.Collections.Generic;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 
 namespace SpyStore.DAL.Tests.RepoTests
 {
     [Collection("SpyStore.DAL")]
-    public class CategoryRepoGetTests : IDisposable
+    public class CategoryRepoGetTests : TestBase
     {
         private readonly CategoryRepo _repo;
+
+        private bool disposedValue = false;
 
         public CategoryRepoGetTests()
         {
             _repo = new CategoryRepo();
             CleanDatabase();
         }
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            CleanDatabase();
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
-        private void CleanDatabase()
+        protected override void CleanDatabase()
         {
             _repo.Context.Database.ExecuteSqlCommand("Delete from Store.Categories");
             _repo.Context.Database.ExecuteSqlCommand($"DBCC CHECKIDENT (\"Store.Categories\", RESEED, -1);");
@@ -43,7 +53,7 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldGetFirstCategory()
         {
-            var categories = new List<Category>()
+            List<Category> categories = new List<Category>()
             {
                 new Category { CategoryName = "Foo" },
                 new Category { CategoryName = "Bar" },
@@ -56,7 +66,7 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldGetACategoryWithProductInfo()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _repo.Add(category, true);
             //var cat = _repo.GetOneWithProducts(2);
             //Assert.Equal(2, cat.Products.Count());
@@ -65,10 +75,9 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldGetCategory()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _repo.Add(category);
             _repo.Find(category.Id);
         }
     }
-
 }

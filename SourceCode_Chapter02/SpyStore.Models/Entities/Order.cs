@@ -1,8 +1,8 @@
+using SpyStore.Models.Entities.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SpyStore.Models.Entities.Base;
 
 namespace SpyStore.Models.Entities
 {
@@ -10,17 +10,22 @@ namespace SpyStore.Models.Entities
     public class Order : EntityBase
     {
         public int CustomerId { get; set; }
+
         [Display(Name = "Total")]
         public decimal? OrderTotal { get; set; }
+
         [DataType(DataType.Date)]
         [Display(Name = "Date Ordered")]
         public DateTime OrderDate { get; set; }
+
         [DataType(DataType.Date)]
         [Display(Name = "Date Shipped")]
         public DateTime ShipDate { get; set; }
-        [ForeignKey("CustomerId")]
+
+        [ForeignKey(nameof(CustomerId))]
         public Customer Customer { get; set; }
-        [InverseProperty("Order")]
+
+        [InverseProperty(nameof(Order))]
         public List<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
     }
 }

@@ -17,7 +17,8 @@ namespace SpyStore.DAL.EF.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     EmailAddress = table.Column<string>(maxLength: 50, nullable: false),
-                    FullName = table.Column<string>(maxLength: 50, nullable: true),
+                    FirstName = table.Column<string>(maxLength: 50, nullable: true),
+                    LastName = table.Column<string>(maxLength: 50, nullable: true),
                     Password = table.Column<string>(maxLength: 50, nullable: false),
                     TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },

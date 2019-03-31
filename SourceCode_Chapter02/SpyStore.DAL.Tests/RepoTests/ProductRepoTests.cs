@@ -1,14 +1,16 @@
-﻿using System.Linq;
-using SpyStore.DAL.Initializers;
+﻿using SpyStore.DAL.Initializers;
 using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
+using System.Linq;
 using Xunit;
-using System;
 
 namespace SpyStore.DAL.Tests.Repos
 {
     [Collection("SpyStore.DAL")]
-    public class ProductRepoTests : IDisposable
+    public class ProductRepoTests : TestBase
     {
+        private bool disposedValue = false;
+
         private readonly ProductRepo _repo;
 
         public ProductRepoTests()
@@ -16,12 +18,21 @@ namespace SpyStore.DAL.Tests.Repos
             _repo = new ProductRepo();
             StoreDataInitializer.ClearData(_repo.Context);
             StoreDataInitializer.InitializeData(_repo.Context);
-
         }
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            StoreDataInitializer.ClearData(_repo.Context);
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    StoreDataInitializer.ClearData(_repo.Context);
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
         [Theory]
@@ -34,8 +45,12 @@ namespace SpyStore.DAL.Tests.Repos
         [InlineData(6, 9)]
         public void ShouldGetAllProductsForACategory(int catId, int productCount)
         {
-            var prods = _repo.GetProductsForCategory(catId).ToList();
-            Assert.Equal(productCount,prods.Count());
+            System.Collections.Generic.List<Models.ViewModels.Base.ProductAndCategoryBase> prods = _repo.GetProductsForCategory(catId).ToList();
+            Assert.Equal(productCount, prods.Count);
+        }
+
+        protected override void CleanDatabase()
+        {
         }
     }
 }

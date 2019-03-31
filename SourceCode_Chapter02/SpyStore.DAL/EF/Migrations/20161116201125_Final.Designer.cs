@@ -45,7 +45,11 @@ namespace SpyStore.DAL.EF.Migrations
                         .IsRequired()
                         .HasMaxLength(50);
 
-                    b.Property<string>("FullName")
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(50);
+
+
+                    b.Property<string>("LastName")
                         .HasMaxLength(50);
 
                     b.Property<string>("Password")

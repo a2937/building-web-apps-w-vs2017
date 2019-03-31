@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
 using SpyStore.Models.Entities;
+using System;
 
 namespace SpyStore.DAL.EF
 {
@@ -21,7 +18,7 @@ namespace SpyStore.DAL.EF
             }
             catch (Exception)
             {
-                //Should do something meaningful here                
+                //Should do something meaningful here
             }
         }
 
@@ -78,7 +75,6 @@ namespace SpyStore.DAL.EF
                 entity.Property(e => e.UnitCost).HasColumnType("money");
             });
 
-
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.Property(e => e.UnitCost).HasColumnType("money");
@@ -98,7 +94,6 @@ namespace SpyStore.DAL.EF
                     .ValueGeneratedNever()
                     .HasDefaultValue(1);
             });
-
         }
 
         public DbSet<Category> Categories { get; set; }
@@ -107,6 +102,5 @@ namespace SpyStore.DAL.EF
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ShoppingCartRecord> ShoppingCartRecords { get; set; }
-
     }
 }

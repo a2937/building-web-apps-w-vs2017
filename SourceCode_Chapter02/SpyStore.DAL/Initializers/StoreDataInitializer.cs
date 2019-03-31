@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SpyStore.DAL.EF;
+using System;
+using System.Linq;
 
 namespace SpyStore.DAL.Initializers
 {
@@ -10,33 +10,37 @@ namespace SpyStore.DAL.Initializers
     {
         public static void InitializeData(IServiceProvider serviceProvider)
         {
-            var context = serviceProvider.GetService<StoreContext>();
+            StoreContext context = serviceProvider.GetService<StoreContext>();
             InitializeData(context);
         }
+
         public static void InitializeData(StoreContext context)
         {
             context.Database.Migrate();
             ClearData(context);
             SeedData(context);
         }
+
         public static void ClearData(StoreContext context)
         {
             ExecuteDeleteSQL(context, "Categories");
             ExecuteDeleteSQL(context, "Customers");
             ResetIdentity(context);
         }
+
         public static void ExecuteDeleteSQL(StoreContext context, string tableName)
         {
-            var sql = $"Delete from Store.{tableName}";
+            string sql = $"Delete from Store.{tableName}";
             context.Database.ExecuteSqlCommand(sql);
         }
+
         public static void ResetIdentity(StoreContext context)
         {
-            var tables = new[] {"Categories","Customers",
+            string[] tables = new[] {"Categories","Customers",
                 "OrderDetails","Orders","Products","ShoppingCartRecords"};
-            foreach (var itm in tables)
+            foreach (string itm in tables)
             {
-                var sql = $"DBCC CHECKIDENT (\"Store.{itm}\", RESEED, -1);";
+                string sql = $"DBCC CHECKIDENT (\"Store.{itm}\", RESEED, -1);";
                 context.Database.ExecuteSqlCommand(sql);
             }
         }
@@ -62,7 +66,7 @@ namespace SpyStore.DAL.Initializers
                         StoreSampleData.GetAllCustomerRecords(context));
                     context.SaveChanges();
                 }
-                var customer = context.Customers.FirstOrDefault();
+                Models.Entities.Customer customer = context.Customers.FirstOrDefault();
                 if (!context.Orders.Any())
                 {
                     context.Orders.AddRange(StoreSampleData.GetOrders(customer, context));

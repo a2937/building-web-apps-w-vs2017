@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using SpyStore.Models.Entities;
-using SpyStore.DAL.Repos;
-using Xunit;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using SpyStore.DAL.EF;
-using SpyStore.DAL.EF.Migrations;
+using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
+using SpyStore.Models.Entities;
+using System;
+using Xunit;
 
 namespace SpyStore.DAL.Tests.RepoTests
 {
     [Collection("SpyStore.DAL")]
-    public class CategoryRepoExceptionTests : IDisposable
+    public class CategoryRepoExceptionTests : TestBase
     {
         private readonly CategoryRepo _repo;
+
+        private bool disposedValue = false;
 
         public CategoryRepoExceptionTests()
         {
@@ -21,13 +22,21 @@ namespace SpyStore.DAL.Tests.RepoTests
             CleanDatabase();
         }
 
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            CleanDatabase();
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
-        private void CleanDatabase()
+        protected override void CleanDatabase()
         {
             _repo.Context.Database.ExecuteSqlCommand("Delete from Store.Categories");
             _repo.Context.Database.ExecuteSqlCommand($"DBCC CHECKIDENT (\"Store.Categories\", RESEED, -1);");
@@ -36,35 +45,36 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldNotDeleteACategoryFromSameContextWithConcurrencyIssue()
         {
-            var category = new Category {CategoryName = "Foo"};
+            Category category = new Category { CategoryName = "Foo" };
             _repo.Add(category);
             Assert.Equal(1, _repo.Count);
-            var ex = Assert.Throws<Exception>(() => _repo.Delete(category.Id, null, false));
+            Assert.Throws<Exception>(() => _repo.Delete(category.Id, null, false));
         }
 
         [Fact]
         public void ShouldNotDeleteOnConcurrencyIssue()
         {
-            var category = new Category {CategoryName = "Foo"};
+            Category category = new Category { CategoryName = "Foo" };
             _repo.Add(category);
             _repo.Context.Database.ExecuteSqlCommand("Update Store.Categories set CategoryName = 'Bar'");
-            var ex = Assert.Throws<DbUpdateConcurrencyException>(() => _repo.Delete(category.Id, category.TimeStamp));
+            Assert.Throws<DbUpdateConcurrencyException>(() => _repo.Delete(category.Id, category.TimeStamp));
         }
 
         [Fact]
         public void ShouldThrowRetryExeptionWhenCantConnect()
         {
-            var contextOptionsBuilder = new DbContextOptionsBuilder<StoreContext>();
-            var connectionString =
+            DbContextOptionsBuilder<StoreContext> contextOptionsBuilder = new DbContextOptionsBuilder<StoreContext>();
+            const string connectionString =
                 @"Server=(localdb)\mssqllocaldb;Database=SpyStore;user id=foo;password=bar;MultipleActiveResultSets=true;";
-            //contextOptionsBuilder.UseSqlServer(connectionString, 
+            //contextOptionsBuilder.UseSqlServer(connectionString,
             //    o => o.EnableRetryOnFailure(2,new TimeSpan(0,0,0,0,100),new Collection<int>{ -2146232060 }));
             contextOptionsBuilder.UseSqlServer(connectionString,
                 o => o.ExecutionStrategy(c => new MyExecutionStrategy(c, 5, new TimeSpan(0, 0, 0, 0, 30))));
-            var repo = new CategoryRepo(contextOptionsBuilder.Options);
-            var category = new Category {CategoryName = "Foo"};
-            var ex = Assert.Throws<RetryLimitExceededException>(()=> repo.Add(category));
+            using (CategoryRepo repo = new CategoryRepo(contextOptionsBuilder.Options))
+            {
+                Category category = new Category { CategoryName = "Foo" };
+                Assert.Throws<RetryLimitExceededException>(() => repo.Add(category));
+            }
         }
-
     }
 }

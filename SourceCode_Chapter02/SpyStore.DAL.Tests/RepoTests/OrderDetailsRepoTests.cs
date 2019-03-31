@@ -1,43 +1,59 @@
-﻿using System.Linq;
-using SpyStore.DAL.Initializers;
+﻿using SpyStore.DAL.Initializers;
 using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
+using System.Linq;
 using Xunit;
-using System;
+using System.Collections.Generic;
+using SpyStore.Models.Entities;
 
 namespace SpyStore.DAL.Tests.Repos
 {
     [Collection("SpyStore.DAL")]
-    public class OrderDetailRepoTests : IDisposable
+    public class OrderDetailRepoTests : TestBase
     {
         private readonly OrderDetailRepo _repo;
+
+        private bool disposedValue = false;
 
         public OrderDetailRepoTests()
         {
             _repo = new OrderDetailRepo();
             StoreDataInitializer.ClearData(_repo.Context);
             StoreDataInitializer.InitializeData(_repo.Context);
-
         }
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            StoreDataInitializer.ClearData(_repo.Context);
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    StoreDataInitializer.ClearData(_repo.Context);
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
         [Fact]
         public void ShouldGetAllOrderDetails()
         {
-            var orders = _repo.GetAll().ToList();
-            Assert.Equal(_repo.Count,orders.Count());
+            List<OrderDetail> orders = _repo.GetAll().ToList();
+            Assert.Equal(_repo.Count, orders.Count);
         }
 
         [Fact]
         public void ShouldGetLineItemTotal()
         {
-            var orderDetails = _repo.GetAll().ToList();
-            var orderDetail = orderDetails[0];
+            List<OrderDetail> orderDetails = _repo.GetAll().ToList();
+            OrderDetail orderDetail = orderDetails[0];
             Assert.Equal(1799.9700M, orderDetail.LineItemTotal);
         }
 
+        protected override void CleanDatabase()
+        {
+        }
     }
 }

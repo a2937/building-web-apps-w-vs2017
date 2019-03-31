@@ -1,35 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
+﻿using Microsoft.EntityFrameworkCore;
 using SpyStore.DAL.EF;
+using SpyStore.DAL.Tests.Base;
 using SpyStore.Models.Entities;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 
 namespace SpyStore.DAL.Tests.ContextTests
 {
     [Collection("SpyStore.DAL")]
-    public class CategoryTests : IDisposable
+    public class CategoryTests : TestBase
     {
-        private readonly StoreContext _db;
-
-        public CategoryTests()
-        {
-            _db = new StoreContext();
-            CleanDatabase();
-        }
-
-        public void Dispose()
-        {
-            CleanDatabase();
-            _db.Dispose();
-        }
-        private void CleanDatabase()
+        protected override void CleanDatabase()
         {
             _db.Database.ExecuteSqlCommand("Delete from Store.Categories");
             _db.Database.ExecuteSqlCommand($"DBCC CHECKIDENT (\"Store.Categories\", RESEED, -1);");
         }
+
         [Fact]
         public void FirstTest()
         {
@@ -39,7 +27,7 @@ namespace SpyStore.DAL.Tests.ContextTests
         [Fact]
         public void ShouldAddACategoryWithDbSet()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             Assert.Equal(EntityState.Added, _db.Entry(category).State);
             Assert.True(category.Id < 0);
@@ -50,10 +38,11 @@ namespace SpyStore.DAL.Tests.ContextTests
             Assert.NotNull(category.TimeStamp);
             Assert.Equal(1, _db.Categories.Count());
         }
+
         [Fact]
         public void ShouldAddACategoryWithContext()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Add(category);
             Assert.Equal(EntityState.Added, _db.Entry(category).State);
             Assert.True(category.Id < 0);
@@ -64,21 +53,23 @@ namespace SpyStore.DAL.Tests.ContextTests
             Assert.NotNull(category.TimeStamp);
             Assert.Equal(1, _db.Categories.Count());
         }
+
         [Fact]
         public void ShouldGetAllCategoriesOrderedByName()
         {
             _db.Categories.Add(new Category { CategoryName = "Foo" });
             _db.Categories.Add(new Category { CategoryName = "Bar" });
             _db.SaveChanges();
-            var categories = _db.Categories.OrderBy(c => c.CategoryName).ToList();
+            List<Category> categories = _db.Categories.OrderBy(c => c.CategoryName).ToList();
             Assert.Equal(2, _db.Categories.Count());
             Assert.Equal("Bar", categories[0].CategoryName);
             Assert.Equal("Foo", categories[1].CategoryName);
         }
+
         [Fact]
         public void ShouldUpdateACategory()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             _db.SaveChanges();
             category.CategoryName = "Bar";
@@ -92,18 +83,20 @@ namespace SpyStore.DAL.Tests.ContextTests
                 Assert.Equal("Bar", context.Categories.First().CategoryName);
             }
         }
+
         [Fact]
         public void ShouldNotUpdateANonAttachedCategory()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             category.CategoryName = "Bar";
             Assert.Throws<InvalidOperationException>(() => _db.Categories.Update(category));
         }
+
         [Fact]
         public void ShouldDeleteACategory()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             _db.SaveChanges();
             Assert.Equal(1, _db.Categories.Count());
@@ -113,30 +106,36 @@ namespace SpyStore.DAL.Tests.ContextTests
             Assert.Equal(EntityState.Detached, _db.Entry(category).State);
             Assert.Equal(0, _db.Categories.Count());
         }
+
         [Fact]
         public void ShouldDeleteACategoryWithTimestampData()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             _db.SaveChanges();
-            var context = new StoreContext();
-            var catToDelete = new Category { Id = category.Id, TimeStamp = category.TimeStamp };
-            context.Entry(catToDelete).State = EntityState.Deleted;
-            var affected = context.SaveChanges();
-            Assert.Equal(1, affected);
+            using (StoreContext context = new StoreContext())
+            {
+                Category catToDelete = new Category { Id = category.Id, TimeStamp = category.TimeStamp };
+                context.Entry(catToDelete).State = EntityState.Deleted;
+                int affected = context.SaveChanges();
+                Assert.Equal(1, affected);
+            }
         }
+
         [Fact]
         public void ShouldNotDeleteACategoryWithoutTimestampData()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _db.Categories.Add(category);
             _db.SaveChanges();
-            var context = new StoreContext();
-            var catToDelete = new Category { Id = category.Id };
-            context.Categories.Remove(catToDelete);
-            var ex = Assert.Throws<DbUpdateConcurrencyException>(() => context.SaveChanges());
-            Assert.Equal(1, ex.Entries.Count);
-            Assert.Equal(category.Id, ((Category)ex.Entries[0].Entity).Id);
+            using (StoreContext context = new StoreContext())
+            {
+                Category catToDelete = new Category { Id = category.Id };
+                context.Categories.Remove(catToDelete);
+                DbUpdateConcurrencyException ex = Assert.Throws<DbUpdateConcurrencyException>(() => context.SaveChanges());
+                Assert.Equal(1, ex.Entries.Count);
+                Assert.Equal(category.Id, ((Category)ex.Entries[0].Entity).Id);
+            }
         }
     }
 }
