@@ -14,8 +14,6 @@ namespace SpyStore.DAL.Tests.Context
         public OrderTests() : base()
         {
             using (StoreContext storeContext = new StoreContext())
-            {
-                StoreDataInitializer.ClearData(storeContext);
                 StoreDataInitializer.InitializeData(storeContext);
             }
         }

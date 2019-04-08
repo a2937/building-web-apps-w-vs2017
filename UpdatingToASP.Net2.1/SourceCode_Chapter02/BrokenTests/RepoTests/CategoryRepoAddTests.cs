@@ -1,16 +1,18 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
+using SpyStore.Models.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using SpyStore.DAL.Repos;
-using SpyStore.Models.Entities;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 
 namespace SpyStore.DAL.Tests.RepoTests
 {
     [Collection("SpyStore.DAL")]
-    public class CategoryRepoAddTests : IDisposable
+    public class CategoryRepoAddTests : TestBase
     {
+        private bool disposedValue = false;
+
         private readonly CategoryRepo _repo;
 
         public CategoryRepoAddTests()
@@ -18,13 +20,22 @@ namespace SpyStore.DAL.Tests.RepoTests
             _repo = new CategoryRepo();
             CleanDatabase();
         }
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            CleanDatabase();
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
-        private void CleanDatabase()
+        protected override void CleanDatabase()
         {
             _repo.Context.Database.ExecuteSqlCommand("Delete from Store.Categories");
             _repo.Context.Database.ExecuteSqlCommand($"DBCC CHECKIDENT (\"Store.Categories\", RESEED, -1);");
@@ -33,17 +44,18 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldAddACategory()
         {
-            var category = new Category { CategoryName = "Foo" };
-            var count = _repo.Add(category);
+            Category category = new Category { CategoryName = "Foo" };
+            int count = _repo.Add(category);
             Assert.Equal(1, count);
             Assert.Equal(0, category.Id);
             Assert.Equal(1, _repo.Count);
         }
+
         [Fact]
         public void ShouldAddACategoryAndNotSaveChanges()
         {
-            var category = new Category { CategoryName = "Foo" };
-            var count = _repo.Add(category, false);
+            Category category = new Category { CategoryName = "Foo" };
+            int count = _repo.Add(category, false);
             Assert.Equal(0, count);
             Assert.True(category.Id < 0);
             Assert.Equal(0, _repo.Count);
@@ -52,13 +64,13 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldAddSeveralCategories()
         {
-            var categories = new List<Category>()
+            List<Category> categories = new List<Category>
             {
                 new Category { CategoryName = "Foo" },
                 new Category { CategoryName = "Bar" },
                 new Category { CategoryName = "FooBar" }
             };
-            var count = _repo.AddRange(categories);
+            int count = _repo.AddRange(categories);
             Assert.Equal(3, count);
             Assert.Equal(3, _repo.GetAll().Count());
             Assert.Equal(3, _repo.Count);
@@ -67,7 +79,7 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldShowHasChanges()
         {
-            var categories = new List<Category>()
+            List<Category> categories = new List<Category>
             {
                 new Category { CategoryName = "Foo" },
                 new Category { CategoryName = "Bar" },
@@ -79,5 +91,4 @@ namespace SpyStore.DAL.Tests.RepoTests
             Assert.False(_repo.HasChanges);
         }
     }
-
 }

@@ -1,35 +1,43 @@
-﻿using SpyStore.DAL.EF;
-using SpyStore.DAL.Initializers;
-using SpyStore.DAL.Tests.Base;
-using SpyStore.Models.Entities;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SpyStore.DAL.EF;
+using SpyStore.DAL.Initializers;
+using SpyStore.Models.Entities;
 using Xunit;
 
 namespace SpyStore.DAL.Tests.Context
 {
     [Collection("SpyStore.DAL")]
-    public class OrderTests : TestBase
+    public class OrderTests : IDisposable
     {
-        public OrderTests() : base()
+        private readonly StoreContext _db;
+
+        public OrderTests()
         {
-            using (StoreContext storeContext = new StoreContext())
-            {
-                StoreDataInitializer.InitializeData(storeContext);
-            }
+            _db = new StoreContext();
+            StoreDataInitializer.InitializeData(_db);
+        }
+
+        public void Dispose()
+        {
+            StoreDataInitializer.ClearData(_db);
+            _db.Dispose();
         }
 
         [Fact]
         public void ShouldGetOrderTotal()
         {
-            Order order = _db.Orders.FirstOrDefault();
-            Assert.Equal(4424.90M, order.OrderTotal.Value);
+            var order = _db.Orders.FirstOrDefault();
+            Assert.Equal(4424.90M, order.OrderTotal ?? 0.0M );
         }
 
         [Fact]
         public void ShouldUpdateAnOrder()
         {
-            Order order = _db.Orders.FirstOrDefault();
+            var order = _db.Orders.FirstOrDefault();
             order.ShipDate = DateTime.Now;
             _db.SaveChanges();
             order = _db.Orders.FirstOrDefault();
@@ -37,28 +45,19 @@ namespace SpyStore.DAL.Tests.Context
                 order.ShipDate.ToString("d"));
         }
 
+
         [Fact]
         public void ShouldGetOrderTotalAfterAddingAnOrderDetail()
         {
-            Order order = _db.Orders.FirstOrDefault();
-            OrderDetail orderDetail = new OrderDetail { OrderId = order.Id, ProductId = 2, Quantity = 5, UnitCost = 100M };
+            var order = _db.Orders.FirstOrDefault();
+            var orderDetail = new OrderDetail() { OrderId = order.Id, ProductId = 2, Quantity = 5, UnitCost = 100M };
             _db.OrderDetails.Add(orderDetail);
             _db.SaveChanges();
-            using (StoreContext storeContext = new StoreContext())
-            {
-                //Need to use a new DbContext to get the updated value
-                order = storeContext.Orders.FirstOrDefault();
-                //order = _db.Orders.FirstOrDefault();
-                Assert.Equal(4924.90M, order.OrderTotal);
-            }
-        }
 
-        protected override void CleanDatabase()
-        {
-            using (StoreContext storeContext = new StoreContext())
-            {
-                StoreDataInitializer.ClearData(storeContext);
-            }
+            //Need to use a new DbContext to get the updated value
+            order = new StoreContext().Orders.FirstOrDefault();
+            //order = _db.Orders.FirstOrDefault();
+            Assert.Equal(4924.90M, order.OrderTotal);
         }
     }
 }

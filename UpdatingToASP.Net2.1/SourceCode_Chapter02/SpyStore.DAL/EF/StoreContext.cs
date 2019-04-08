@@ -1,11 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using log4net;
+using Microsoft.EntityFrameworkCore;
+
 using SpyStore.Models.Entities;
 using System;
+using System.Data;
+using System.Reflection;
 
 namespace SpyStore.DAL.EF
 {
     public class StoreContext : DbContext
     {
+
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<Customer> Customers { get; set; }
@@ -20,6 +25,7 @@ namespace SpyStore.DAL.EF
 
         public StoreContext()
         {
+
         }
 
         /// <summary>
@@ -38,8 +44,9 @@ namespace SpyStore.DAL.EF
             {
                 Database.Migrate();
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                //LogHelper._logger.Error("Database migration failure.",exception);
                 //Should do something intelligent here
             }
         }
@@ -48,7 +55,7 @@ namespace SpyStore.DAL.EF
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=SpyStore;Trusted_Connection=True;MultipleActiveResultSets=true;", options => options.ExecutionStrategy(c => new MyExecutionStrategy(c)));
+                optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=SpyStore;Trusted_Connection=True;MultipleActiveResultSets=true;");
             }
         }
 

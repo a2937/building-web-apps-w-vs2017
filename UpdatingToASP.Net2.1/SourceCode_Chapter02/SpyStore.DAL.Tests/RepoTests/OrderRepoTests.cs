@@ -1,49 +1,34 @@
-﻿using SpyStore.DAL.Initializers;
+﻿using System.Linq;
+using SpyStore.DAL.Initializers;
 using SpyStore.DAL.Repos;
-using SpyStore.DAL.Tests.Base;
-using System.Linq;
 using Xunit;
+using System;
 
 namespace SpyStore.DAL.Tests.Repos
 {
     [Collection("SpyStore.DAL")]
-    public class OrderRepoTests : TestBase
+    public class OrderRepoTests : IDisposable
     {
         private readonly OrderRepo _repo;
-
-        private bool disposedValue = false;
 
         public OrderRepoTests()
         {
             _repo = new OrderRepo(new OrderDetailRepo());
             StoreDataInitializer.ClearData(_repo.Context);
             StoreDataInitializer.InitializeData(_repo.Context);
+
         }
-
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    StoreDataInitializer.ClearData(_repo.Context);
-                    _repo.Dispose();
-                }
-
-                disposedValue = true;
-                base.Dispose(disposing);
-            }
+            StoreDataInitializer.ClearData(_repo.Context);
+            _repo.Dispose();
         }
 
         [Fact]
         public void ShouldGetAllOrders()
         {
-            System.Collections.Generic.List<Models.Entities.Order> orders = _repo.GetAll().ToList();
-            Assert.Single(orders);
-        }
-
-        protected override void CleanDatabase()
-        {
+            var orders = _repo.GetAll().ToList();
+            Assert.Equal(1,orders.Count());
         }
     }
 }

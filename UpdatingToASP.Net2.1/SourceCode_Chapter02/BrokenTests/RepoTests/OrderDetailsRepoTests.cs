@@ -1,21 +1,23 @@
 ﻿using SpyStore.DAL.Initializers;
 using SpyStore.DAL.Repos;
 using SpyStore.DAL.Tests.Base;
+using SpyStore.Models.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace SpyStore.DAL.Tests.Repos
 {
     [Collection("SpyStore.DAL")]
-    public class OrderRepoTests : TestBase
+    public class OrderDetailRepoTests : TestBase
     {
-        private readonly OrderRepo _repo;
+        private readonly OrderDetailRepo _repo;
 
         private bool disposedValue = false;
 
-        public OrderRepoTests()
+        public OrderDetailRepoTests()
         {
-            _repo = new OrderRepo(new OrderDetailRepo());
+            _repo = new OrderDetailRepo();
             StoreDataInitializer.ClearData(_repo.Context);
             StoreDataInitializer.InitializeData(_repo.Context);
         }
@@ -36,15 +38,22 @@ namespace SpyStore.DAL.Tests.Repos
         }
 
         [Fact]
-        public void ShouldGetAllOrders()
+        public void ShouldGetAllOrderDetails()
         {
-            System.Collections.Generic.List<Models.Entities.Order> orders = _repo.GetAll().ToList();
-            Assert.Equal(1, orders.Count);
+            List<OrderDetail> orders = _repo.GetAll().ToList();
+            Assert.Equal(_repo.Count, orders.Count);
+        }
+
+        [Fact]
+        public void ShouldGetLineItemTotal()
+        {
+            List<OrderDetail> orderDetails = _repo.GetAll().ToList();
+            OrderDetail orderDetail = orderDetails[0];
+            Assert.Equal(1799.9700M, orderDetail.LineItemTotal);
         }
 
         protected override void CleanDatabase()
         {
-           
         }
     }
 }

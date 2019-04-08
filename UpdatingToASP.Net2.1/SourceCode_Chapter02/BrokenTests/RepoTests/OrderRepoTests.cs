@@ -1,6 +1,8 @@
 ﻿using SpyStore.DAL.Initializers;
 using SpyStore.DAL.Repos;
 using SpyStore.DAL.Tests.Base;
+using SpyStore.Models.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -38,13 +40,12 @@ namespace SpyStore.DAL.Tests.Repos
         [Fact]
         public void ShouldGetAllOrders()
         {
-            System.Collections.Generic.List<Models.Entities.Order> orders = _repo.GetAll().ToList();
-            Assert.Equal(1, orders.Count);
+            List<Order> orders = _repo.GetAll().ToList();
+            Assert.Single(orders);
         }
 
         protected override void CleanDatabase()
         {
-           
         }
     }
 }

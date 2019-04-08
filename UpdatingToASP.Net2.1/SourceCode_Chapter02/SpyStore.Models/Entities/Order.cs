@@ -12,6 +12,7 @@ namespace SpyStore.Models.Entities
         public int CustomerId { get; set; }
 
         [Display(Name = "Total")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal? OrderTotal { get; set; }
 
         [DataType(DataType.Date)]

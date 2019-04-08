@@ -1,31 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using SpyStore.DAL.Repos;
+using SpyStore.DAL.Tests.Base;
 using SpyStore.Models.Entities;
+using System.Collections.Generic;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using SpyStore.DAL.EF;
 
 namespace SpyStore.DAL.Tests.RepoTests
 {
     [Collection("SpyStore.DAL")]
-    public class CategoryRepoUpdateTests : IDisposable
+    public class CategoryRepoUpdateTests : TestBase
     {
         private readonly CategoryRepo _repo;
+
+        private bool disposedValue = false;
 
         public CategoryRepoUpdateTests()
         {
             _repo = new CategoryRepo();
             CleanDatabase();
         }
-        public void Dispose()
+
+        protected override void Dispose(bool disposing)
         {
-            CleanDatabase();
-            _repo.Dispose();
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _repo.Dispose();
+                }
+
+                disposedValue = true;
+                base.Dispose(disposing);
+            }
         }
 
-        private void CleanDatabase()
+        protected override void CleanDatabase()
         {
             _repo.Context.Database.ExecuteSqlCommand("Delete from Store.Categories");
             _repo.Context.Database.ExecuteSqlCommand($"DBCC CHECKIDENT (\"Store.Categories\", RESEED, -1);");
@@ -34,24 +43,26 @@ namespace SpyStore.DAL.Tests.RepoTests
         [Fact]
         public void ShouldUpdateACategoryEntity()
         {
-            var category = new Category { CategoryName = "Foo" };
+            Category category = new Category { CategoryName = "Foo" };
             _repo.AddRange(new List<Category>
             {
                 category,
             });
             category.CategoryName = "Bar";
             _repo.Update(category, false);
-            var count = _repo.SaveChanges();
+            int count = _repo.SaveChanges();
             Assert.Equal(1, count);
-            var repo = new CategoryRepo();
-            var cat = repo.GetFirst();
-            Assert.Equal(cat.CategoryName, category.CategoryName);
-
+            using (CategoryRepo repo = new CategoryRepo())
+            {
+                Category cat = repo.GetFirst();
+                Assert.Equal(cat.CategoryName, category.CategoryName);
+            }
         }
+
         [Fact]
         public void ShouldUpdateARangeOfCategoryEntities()
         {
-            var categories = new List<Category>
+            List<Category> categories = new List<Category>
             {
                 new Category { CategoryName = "Foo" },
                 new Category { CategoryName = "Bar" },
@@ -62,13 +73,13 @@ namespace SpyStore.DAL.Tests.RepoTests
             categories[1].CategoryName = "Foo2";
             categories[2].CategoryName = "Foo3";
             _repo.UpdateRange(categories, false);
-            var count = _repo.SaveChanges();
+            int count = _repo.SaveChanges();
             Assert.Equal(3, count);
-            var repo = new CategoryRepo();
-            var cat = repo.GetFirst();
-            Assert.Equal("Foo1", cat.CategoryName);
-
+            using (CategoryRepo repo = new CategoryRepo())
+            {
+                Category cat = repo.GetFirst();
+                Assert.Equal("Foo1", cat.CategoryName);
+            }
         }
     }
-
 }

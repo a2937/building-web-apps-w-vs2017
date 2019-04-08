@@ -126,11 +126,13 @@ namespace SpyStore.DAL.Repos.Base
             {
                 //A concurrency error occurred
                 //Should handle intelligently
+                //LogHelper._logger.Error("DBUpdateConcurrencyException on SaveChanges",ex);
                 Console.WriteLine(ex);
                 throw;
             }
             catch (RetryLimitExceededException ex)
             {
+                // LogHelper._logger.Error("DbResiliency retry limit exceeded on SaveChanges",ex);
                 //DbResiliency retry limit exceeded
                 //Should handle intelligently
                 Console.WriteLine(ex);
@@ -139,6 +141,7 @@ namespace SpyStore.DAL.Repos.Base
             catch (Exception ex)
             {
                 //Should handle intelligently
+                 //LogHelper._logger.Error("DbResiliency retry limit exceeded on SaveChanges",ex);
                 Console.WriteLine(ex);
                 throw;
                 //-2146232060

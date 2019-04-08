@@ -30,8 +30,7 @@ namespace SpyStore.DAL.Initializers
 
         public static void ExecuteDeleteSQL(StoreContext context, string tableName)
         {
-            string sql = $"Delete from Store.{tableName}";
-            context.Database.ExecuteSqlCommand(sql);
+            context.Database.ExecuteSqlCommand($"Delete from Store.{tableName}");
         }
 
         public static void ResetIdentity(StoreContext context)
@@ -40,8 +39,7 @@ namespace SpyStore.DAL.Initializers
                 "OrderDetails","Orders","Products","ShoppingCartRecords"};
             foreach (string itm in tables)
             {
-                string sql = $"DBCC CHECKIDENT (\"Store.{itm}\", RESEED, -1);";
-                context.Database.ExecuteSqlCommand(sql);
+                context.Database.ExecuteSqlCommand( $"DBCC CHECKIDENT (\"Store.{itm}\", RESEED, -1);");
             }
         }
 

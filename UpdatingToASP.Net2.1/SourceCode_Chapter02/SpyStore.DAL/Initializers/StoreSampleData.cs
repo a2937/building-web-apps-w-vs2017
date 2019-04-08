@@ -1,17 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SpyStore.DAL.EF;
-using SpyStore.Models.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using SpyStore.Models.Entities;
+using SpyStore.DAL.EF;
 
 namespace SpyStore.DAL.Initializers
 {
     public static class StoreSampleData
     {
-        public static IEnumerable<Category> GetCategories()
-        {
-            return new List<Category>
+        public static IEnumerable<Category> GetCategories() => new List<Category>
         {
             new Category {CategoryName = "Communications"},
             new Category {CategoryName = "Deception"},
@@ -21,12 +19,10 @@ namespace SpyStore.DAL.Initializers
             new Category {CategoryName = "Tools"},
             new Category {CategoryName = "General"}
         };
-        }
-
         public static IList<Product> GetProducts(IList<Category> categories)
         {
-            List<Product> products = new List<Product>();
-            foreach (Category category in categories)
+            var products = new List<Product>();
+            foreach (var category in categories)
             {
                 switch (category.CategoryName)
                 {
@@ -112,7 +108,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "Deception":
                         products.AddRange(new List<Product>
                         {
@@ -195,7 +190,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "Travel":
                         products.AddRange(new List<Product>
                         {
@@ -293,7 +287,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "Protection":
                         products.AddRange(new List<Product>
                         {
@@ -391,7 +384,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "Munitions":
                         products.AddRange(new List<Product>
                         {
@@ -443,7 +435,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "Tools":
                         products.AddRange(new List<Product>
                         {
@@ -556,10 +547,10 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     case "General":
                         products.AddRange(new List<Product>
                         {
+
                             new Product
                             {
                                 Category = category,
@@ -699,7 +690,6 @@ namespace SpyStore.DAL.Initializers
                             },
                         });
                         break;
-
                     default:
                         break;
                 }
@@ -707,11 +697,9 @@ namespace SpyStore.DAL.Initializers
             return products;
         }
 
-        public static IEnumerable<Customer> GetAllCustomerRecords(StoreContext context)
+        public static IEnumerable<Customer> GetAllCustomerRecords(StoreContext context) => new List<Customer>
         {
-            return new List<Customer>
-        {
-            new Customer
+            new Customer()
             {
                 EmailAddress = "spy@secrets.com",
                 Password = "Foo",
@@ -719,13 +707,10 @@ namespace SpyStore.DAL.Initializers
                 LastName = "Spy"
             }
         };
-        }
 
-        public static List<Order> GetOrders(Customer customer, StoreContext context)
+        public static List<Order> GetOrders(Customer customer, StoreContext context) => new List<Order>
         {
-            return new List<Order>
-        {
-            new Order
+            new Order()
             {
                 Customer = customer,
                 OrderDate = DateTime.Now.Subtract(new TimeSpan(20, 0, 0, 0)),
@@ -733,52 +718,50 @@ namespace SpyStore.DAL.Initializers
                 OrderDetails = GetOrderDetails(context)
             }
         };
-        }
-
         public static List<OrderDetail> GetOrderDetails(
             Order order, StoreContext context)
         {
-            Product prod1 = context.Categories
+            var prod1 = context.Categories
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(3).FirstOrDefault();
-            Product prod2 = context.Categories.Skip(2)
+            var prod2 = context.Categories.Skip(2)
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(2).FirstOrDefault();
-            Product prod3 = context.Categories.Skip(5)
+            var prod3 = context.Categories.Skip(5)
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(1).FirstOrDefault();
             return new List<OrderDetail>
             {
-                new OrderDetail {Order = order, Product = prod1, Quantity = 3, UnitCost = (prod1 == null) ? 10 : prod1.CurrentPrice},
-                new OrderDetail {Order = order, Product = prod2, Quantity = 2, UnitCost =  (prod2 == null) ? 10 : prod2.CurrentPrice},
-                new OrderDetail {Order = order, Product = prod3, Quantity = 5, UnitCost = (prod3 == null) ? 10 : prod3.CurrentPrice},
+                new OrderDetail() {Order = order, Product = prod1, Quantity = 3, UnitCost = prod1.CurrentPrice},
+                new OrderDetail() {Order = order, Product = prod2, Quantity = 2, UnitCost = prod2.CurrentPrice},
+                new OrderDetail() {Order = order, Product = prod3, Quantity = 5, UnitCost = prod3.CurrentPrice},
             };
         }
 
         public static List<OrderDetail> GetOrderDetails(
             StoreContext context)
         {
-            Product prod1 = context.Categories
+            var prod1 = context.Categories
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(3).FirstOrDefault();
-            Product prod2 = context.Categories.Skip(2)
+            var prod2 = context.Categories.Skip(2)
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(2).FirstOrDefault();
-            Product prod3 = context.Categories.Skip(5)
+            var prod3 = context.Categories.Skip(5)
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(1).FirstOrDefault();
             return new List<OrderDetail>
             {
-                new OrderDetail {Product = prod1, Quantity = 3, UnitCost = (prod1 == null) ? 10 : prod1.CurrentPrice},
-                new OrderDetail {Product = prod2, Quantity = 2, UnitCost = (prod2 == null) ? 10 : prod2.CurrentPrice},
-                new OrderDetail {Product = prod3, Quantity = 5, UnitCost = (prod3 == null) ? 10 : prod3.CurrentPrice},
+                new OrderDetail() {Product = prod1, Quantity = 3, UnitCost = prod1.CurrentPrice},
+                new OrderDetail() {Product = prod2, Quantity = 2, UnitCost = prod2.CurrentPrice},
+                new OrderDetail() {Product = prod3, Quantity = 5, UnitCost = prod3.CurrentPrice},
             };
         }
 
         public static IList<ShoppingCartRecord> GetCart(
             Customer customer, StoreContext context)
         {
-            Product prod1 = context.Categories.Skip(2)
+            var prod1 = context.Categories.Skip(2)
                 .Include(c => c.Products).FirstOrDefault()?
                 .Products.Skip(1).FirstOrDefault();
             return new List<ShoppingCartRecord>
@@ -788,5 +771,6 @@ namespace SpyStore.DAL.Initializers
                     Product = prod1, Quantity = 1}
             };
         }
+
     }
 }

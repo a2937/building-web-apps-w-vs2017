@@ -7,15 +7,15 @@ using Xunit;
 namespace SpyStore.DAL.Tests.Repos
 {
     [Collection("SpyStore.DAL")]
-    public class OrderRepoTests : TestBase
+    public class ProductRepoTests : TestBase
     {
-        private readonly OrderRepo _repo;
-
         private bool disposedValue = false;
 
-        public OrderRepoTests()
+        private readonly ProductRepo _repo;
+
+        public ProductRepoTests()
         {
-            _repo = new OrderRepo(new OrderDetailRepo());
+            _repo = new ProductRepo();
             StoreDataInitializer.ClearData(_repo.Context);
             StoreDataInitializer.InitializeData(_repo.Context);
         }
@@ -35,16 +35,22 @@ namespace SpyStore.DAL.Tests.Repos
             }
         }
 
-        [Fact]
-        public void ShouldGetAllOrders()
+        [Theory]
+        [InlineData(0, 5)]
+        [InlineData(1, 5)]
+        [InlineData(2, 6)]
+        [InlineData(3, 6)]
+        [InlineData(4, 3)]
+        [InlineData(5, 7)]
+        [InlineData(6, 9)]
+        public void ShouldGetAllProductsForACategory(int catId, int productCount)
         {
-            System.Collections.Generic.List<Models.Entities.Order> orders = _repo.GetAll().ToList();
-            Assert.Equal(1, orders.Count);
+            System.Collections.Generic.List<Models.ViewModels.Base.ProductAndCategoryBase> prods = _repo.GetProductsForCategory(catId).ToList();
+            Assert.Equal(productCount, prods.Count);
         }
 
         protected override void CleanDatabase()
         {
-           
         }
     }
 }
