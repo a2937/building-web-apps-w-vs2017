@@ -55,7 +55,7 @@ namespace SpyStore.DAL.Tests.Repos
             };
             _repo.Add(item);
             var shoppingCartRecords = _repo.GetAll().ToList();
-            Assert.Equal(1,shoppingCartRecords.Count);
+            Assert.Single(shoppingCartRecords);
             Assert.Equal(2,shoppingCartRecords[0].Quantity);
         }
 
@@ -95,7 +95,7 @@ namespace SpyStore.DAL.Tests.Repos
             item.DateCreated = DateTime.Now;
             _repo.Update(item);
             var shoppingCartRecords = _repo.GetAll().ToList();
-            Assert.Equal(1,shoppingCartRecords.Count);
+            Assert.Single(shoppingCartRecords);
             Assert.Equal(5, shoppingCartRecords[0].Quantity);
         }
 
@@ -107,7 +107,7 @@ namespace SpyStore.DAL.Tests.Repos
             item.DateCreated = DateTime.Now;
             _repo.Update(item);
             var shoppingCartRecords = _repo.GetAll().ToList();
-            Assert.Equal(0, shoppingCartRecords.Count);
+            Assert.Empty(shoppingCartRecords);
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace SpyStore.DAL.Tests.Repos
             item.DateCreated = DateTime.Now;
             _repo.Update(item);
             var shoppingCartRecords = _repo.GetAll().ToList();
-            Assert.Equal(0, shoppingCartRecords.Count);
+            Assert.Empty(shoppingCartRecords);
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace SpyStore.DAL.Tests.Repos
             var item = _repo.Find(0, 32);
             _repo.Context.Entry(item).State = EntityState.Detached;
             _repo.Delete(item.Id, item.TimeStamp);
-            Assert.Equal(0, _repo.GetAll().Count());
+            Assert.Empty(_repo.GetAll());
         }
         [Fact]
         public void ShouldNotDeleteMissingCartRecord()
@@ -163,7 +163,7 @@ namespace SpyStore.DAL.Tests.Repos
         public void ShouldProcessAnOrder()
         {
             var orders1 = new OrderRepo(new OrderDetailRepo()).GetAll();
-            Assert.Equal(1, orders1.ToList().Count);
+            Assert.Single(orders1.ToList());
             _repo.Purchase(0);
             var orders2 = new OrderRepo(new OrderDetailRepo()).GetAll();
             Assert.Equal(2, orders2.ToList().Count);

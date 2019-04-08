@@ -42,7 +42,7 @@ namespace SpyStore.DAL.Repos
                                    TimeStamp = x.TimeStamp,
                                    CustomerId = customerId,
                                    OrderDate = x.OrderDate,
-                                   OrderTotal = x.OrderTotal,
+                                   OrderDetails = _orderDetailRepo.GetAll().Where(y=> y.OrderId == y.Id).ToList(),
                                    ShipDate = x.ShipDate,
                                });
         }

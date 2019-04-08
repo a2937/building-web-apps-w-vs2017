@@ -55,8 +55,8 @@ namespace SpyStore.DAL.Tests.Context
             _db.SaveChanges();
 
             //Need to use a new DbContext to get the updated value
-            order = new StoreContext().Orders.FirstOrDefault();
-            //order = _db.Orders.FirstOrDefault();
+            //order = new StoreContext().Orders.FirstOrDefault();
+            order = _db.Orders.FirstOrDefault();
             Assert.Equal(4924.90M, order.OrderTotal);
         }
     }

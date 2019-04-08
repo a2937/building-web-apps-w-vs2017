@@ -23,6 +23,7 @@ namespace SpyStore.DAL.Initializers
         {
             ExecuteDeleteSQL(context, "Categories");
             ExecuteDeleteSQL(context, "Customers");
+            ExecuteDeleteSQL(context, "Products");
             ResetIdentity(context);
         }
         public static void ExecuteDeleteSQL(StoreContext context, string tableName)

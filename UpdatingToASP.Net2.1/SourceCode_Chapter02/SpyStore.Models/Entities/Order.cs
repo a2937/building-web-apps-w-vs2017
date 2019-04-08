@@ -3,17 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace SpyStore.Models.Entities
 {
     [Table("Orders", Schema = "Store")]
     public class Order : EntityBase
     {
+        private decimal? _ordertotal;
+
         public int CustomerId { get; set; }
 
         [Display(Name = "Total")]
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public decimal? OrderTotal { get; set; }
+        public decimal? OrderTotal { get => OrderDetails.Sum(x => (x.Quantity * x.UnitCost)); private set { _ordertotal = value; } }
 
         [DataType(DataType.Date)]
         [Display(Name = "Date Ordered")]

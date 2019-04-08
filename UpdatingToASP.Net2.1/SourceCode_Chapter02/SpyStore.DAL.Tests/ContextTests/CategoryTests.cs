@@ -131,12 +131,14 @@ namespace SpyStore.DAL.Tests.ContextTests
         public void ShouldNotDeleteACategoryWithoutTimestampData()
         {
             var category = new Category { CategoryName = "Foo" };
-            EntityEntry<Category> categoryEntry = _db.Categories.Add(category);
+             _db.Categories.Add(category);
             _db.SaveChanges();
             var context = new StoreContext();
+
+            int id = category.Id;
             var catToDelete = new Category { Id = category.Id };
 
-            context.Categories.Remove(catToDelete);
+            EntityEntry<Category> entry = context.Categories.Remove(catToDelete);
             var ex = Assert.Throws<DbUpdateConcurrencyException>(() => context.SaveChanges());
             Assert.Equal(1, ex.Entries.Count);
             Assert.Equal(category.Id, ((Category)ex.Entries[0].Entity).Id);
